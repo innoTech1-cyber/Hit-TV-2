@@ -1,1 +1,75 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HIT TV STUDIO</title><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script><script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script><style>body{font-family:sans-serif;background:#0f172a;color:white;padding:15px;margin:0}h1{text-align:center;color:#facc15}h2{color:#38bdf8;border-bottom:1px solid #334155;padding-bottom:5px;margin-top:25px}.card{background:#1e293b;padding:15px;border-radius:10px;margin-bottom:15px}input,textarea,select{width:100%;padding:10px;margin:5px 0;border-radius:6px;border:none;background:#0f172a;color:white;box-sizing:border-box}button{background:#facc15;color:#000;padding:10px 15px;border:none;border-radius:6px;font-weight:bold;width:100%;cursor:pointer;margin-top:5px}button:active{opacity:0.8}.del{background:#ef4444;color:white;margin-top:3px}.item{background:#0f172a;padding:8px;border-radius:5px;margin-top:8px;font-size:13px;display:flex;justify-content:space-between;align-items:center}</style></head><body>
+<h1>🎬 HIT TV STUDIO<br><small style="font-size:12px">by InnoLabs - Boss Panel</small></h1>
 
+<h2>🎥 Post Video (Home Feed)</h2>
+<div class="card">
+<input id="vTitle" placeholder="Title e.g. New Ugandan Movie">
+<textarea id="vDesc" placeholder="Description"></textarea>
+<input id="vThumb" placeholder="Thumbnail Image Link (https://...)">
+<input id="vUrl" placeholder="YouTube Embed Link (https://www.youtube.com/embed/...)">
+<select id="vCat"><option>Movies</option><option>Cartoons</option><option>Music</option><option>Comedy</option><option>Drama</option></select>
+<button onclick="addVideo()">Add Video LIVE</button>
+<div id="videoList"></div>
+</div>
+
+<h2>🖼️ Post Banner (What's Hot - MTN MoMo Style)</h2>
+<div class="card">
+<input id="bTitle" placeholder="Banner Title e.g. Boredom ends here">
+<input id="bDesc" placeholder="Banner Subtitle e.g. Watch 100+ movies free">
+<input id="bImg" placeholder="Banner Image Link (https://...)">
+<input id="bBtn" placeholder="Button Text e.g. Watch Now" value="Watch Now">
+<input id="bLink" placeholder="Button Link (leave blank = just show)">
+<button onclick="addBanner()">Add Banner LIVE</button>
+<div id="bannerList"></div>
+</div>
+
+<h2>💰 Post Offer (Win/Claim)</h2>
+<div class="card">
+<input id="oTitle" placeholder="Offer Title e.g. Win UGX 50,000">
+<textarea id="oDesc" placeholder="Offer Description"></textarea>
+<input id="oImg" placeholder="Offer Image Link">
+<input id="oBtn" placeholder="Button e.g. Claim Now">
+<button onclick="addOffer()">Add Offer LIVE</button>
+<div id="offerList"></div>
+</div>
+
+<script>
+const firebaseConfig={apiKey:"AIzaSyAGzXyxT4a2z3k3x4a2z3k3x4",authDomain:"hittvapp1-29f3a.firebaseapp.com",databaseURL:"https://hittvapp1-29f3a-default-rtdb.firebaseio.com",projectId:"hittvapp1-29f3a",storageBucket:"hittvapp1-29f3a.appspot.com",messagingSenderId:"123456789",appId:"1:123456789:web:abcd"};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+
+function addVideo(){
+ const d={title:vTitle.value,description:vDesc.value,thumbnail:vThumb.value,url:vUrl.value,category:vCat.value,timestamp:Date.now()};
+ if(!d.title||!d.thumbnail)return alert("Add Title + Thumbnail");
+ db.ref("videos").push(d).then(()=>{alert("Video LIVE!");vTitle.value="";vThumb.value="";vUrl.value=""});
+}
+function addBanner(){
+ const d={title:bTitle.value,description:bDesc.value,image:bImg.value,buttonText:bBtn.value,link:bLink.value,timestamp:Date.now()};
+ if(!d.image)return alert("Add Image Link");
+ db.ref("banners").push(d).then(()=>{alert("Banner LIVE! Go check Home!");bTitle.value="";bImg.value=""});
+}
+function addOffer(){
+ const d={title:oTitle.value,description:oDesc.value,image:oImg.value,buttonText:oBtn.value,timestamp:Date.now()};
+ if(!d.title)return alert("Add Title");
+ db.ref("offers").push(d).then(()=>{alert("Offer LIVE!");oTitle.value=""});
+}
+
+function load(){
+ db.ref("banners").on("value",s=>{
+  bannerList.innerHTML="";
+  s.forEach(c=>{
+   const v=c.val();
+   bannerList.innerHTML+=`<div class="item"><span>${v.title}</span><button class="del" onclick="db.ref('banners/${c.key}').remove()">Del</button></div>`;
+  });
+ });
+ db.ref("videos").on("value",s=>{
+  videoList.innerHTML="";
+  s.forEach(c=>{
+   const v=c.val();
+   videoList.innerHTML+=`<div class="item"><span>${v.title}</span><button class="del" onclick="db.ref('videos/${c.key}').remove()">Del</button></div>`;
+  });
+ });
+}
+load();
+</script>
+</body></html>
